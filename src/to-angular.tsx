@@ -1,7 +1,7 @@
 import { Directive, EventEmitter, Injector, OnChanges, OnDestroy, OnInit, SimpleChanges, Type, ViewContainerRef } from '@angular/core';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { createContext, JSXElementConstructor } from 'react';
-import { Subject } from 'rxjs';
+import {  JSXElementConstructor } from 'react';
+import { Observable } from 'rxjs';
 import { InjectorContext } from './services';
 
 
@@ -111,4 +111,4 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
 
 type ToAngular<T> = Type<MapNg<T>>;
 type MapNg<T> = { [k in keyof T]: PropType<T[k]> }
-type PropType<T> = T extends (arg: infer X) => any ? Subject<X> : T;
+type PropType<T> = T extends (arg: infer X) => any ? Observable<X> : T;

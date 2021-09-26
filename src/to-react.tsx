@@ -1,7 +1,7 @@
 import { ApplicationRef, ComponentFactory, ComponentFactoryResolver, ComponentRef, EmbeddedViewRef, Injector, Type } from '@angular/core';
 import { createRef, Dispatch, JSXElementConstructor, SetStateAction } from 'react';
 import { Component } from 'react';
-import { Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { render } from 'react-dom';
 import { ToAngularBridge } from './to-angular';
 import { InjectorContext } from './services';
@@ -112,7 +112,7 @@ export class ReactBridge<directives = {}> extends ToAngularBridge {
 
                 // Subscribe to events & forward them to react props as functions
                 for (const { propName } of componentFactory.outputs) {
-                    (this.componentRef.instance[propName] as Subject<any>)
+                    (this.componentRef.instance[propName] as Observable<any>)
                         .subscribe(e => {
                             // forward to listener
                             this.props[propName]?.(e);
@@ -252,8 +252,8 @@ type DeconstructOpts<O>
  *
  * ex:
  * ```typescript
-        type XX = { a: string, b: number, bChange: Subject<number> };
-        type OUTPUTS = DetectOutputs<XX> //  => Record<"a", string> & Record<"b", number> & Record<"b$", ReactState<number>> & Record<"bChange", Subject<number>>;
+        type XX = { a: string, b: number, bChange: Observable<number> };
+        type OUTPUTS = DetectOutputs<XX> //  => Record<"a", string> & Record<"b", number> & Record<"b$", ReactState<number>> & Record<"bChange", Observable<number>>;
     ```
  */
 
@@ -266,11 +266,11 @@ type Ouptuts<O, K extends keyof O> = K extends `${infer X}Change`
     ? X extends (keyof O)
     ? EmitterType<O, X, K> | [K, PropType<O[K]>] : [K, PropType<O[K]>] : [K, PropType<O[K]>];
 
-type PropType<T> = T extends Subject<infer E> ? (event: E) => any : T;
+type PropType<T> = T extends Observable<infer E> ? (event: E) => any : T;
 
 /** Builds an emitter type from matching input + output properties */
 type EmitterType<O, V extends keyof O & string, E extends keyof O>
-    = O[E] extends Subject<infer T>
+    = O[E] extends Observable<infer T>
     ? O[V] extends T ? [`${V}$`, ReactState<T>]
     : never : never;
 
