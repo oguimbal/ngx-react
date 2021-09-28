@@ -64,16 +64,16 @@ npm i @types/react @types/react-dom -D
 At the root of you project, declare a file `bridge.ts` :
 
 ```typescript
-import { ReactBridge } from "ngx-react";
+import { NgxReactBridge } from "ngx-react";
 
 // declare the bridge
-export const reactBridge = new ReactBridge();
+export const reactBridge = new NgxReactBridge();
 ```
 
 you can OPTINALLY declare there the directives that will be available in your react componetns globaly, such as, for instance:
 
 ```typescript
-export const reactBridge = new ReactBridge();
+export const reactBridge = new NgxReactBridge();
     .addDirective('focus', (focus: boolean, _, elt) => setTimeout(() => focus && elt.focus()))
 ```
 

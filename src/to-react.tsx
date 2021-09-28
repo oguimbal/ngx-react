@@ -17,7 +17,7 @@ interface ToReactOpts {
  * If you want to subscribe to subsequent renders, return a handler,
  * that will be called on each react re-render with the current directive value.
  */
-export type ReactBridgeDirective<ValueType> = (
+export type NgxReactBridgeDirective<ValueType> = (
     value: ValueType,
     angularComponent: ComponentRef<any>,
     domElement: HTMLElement
@@ -25,9 +25,9 @@ export type ReactBridgeDirective<ValueType> = (
 
 export type OnDirectiveRender<T> = (value: T) => void;
 
-export class ReactBridge<directives = {}> extends ToAngularBridge {
+export class NgxReactBridge<directives = {}> extends ToAngularBridge {
 
-    private directives: [string, ReactBridgeDirective<any>][] = [];
+    private directives: [string, NgxReactBridgeDirective<any>][] = [];
 
     /**
      * Declares an equivalent of an angular directive: A prop that will appear on all React registered component.
@@ -36,8 +36,8 @@ export class ReactBridge<directives = {}> extends ToAngularBridge {
      *   .addDirective('focus', (focus, _, elt) => setTimeout(() => focus && elt.focus()))
      */
     addDirective<dirValueType, dirName extends string>(name: dirName,
-        attach: ReactBridgeDirective<dirValueType>)
-        : ReactBridge<directives & { [key in dirName]?: dirValueType }> {
+        attach: NgxReactBridgeDirective<dirValueType>)
+        : NgxReactBridge<directives & { [key in dirName]?: dirValueType }> {
         this.directives.push([name, attach]);
         return this as any;
     }
