@@ -7,8 +7,10 @@ export const InjectorContext = createContext<Injector | null>(null);
 export function useInjector(): Injector {
     return useContext(InjectorContext)!;
 }
-
+interface ClassOrAbstract<T> extends Function {
+    readonly prototype: T;
+}
 /** Gets an angular service */
-export function useService<T>(type: Type<T>): T {
+export function useService<T>(type: ClassOrAbstract<T>): T {
     return useInjector().get(type);
 }
