@@ -1,4 +1,4 @@
-import { ApplicationRef, ComponentFactory, ComponentFactoryResolver, ComponentRef, EmbeddedViewRef, Injector, Type } from '@angular/core';
+import { ApplicationRef, ChangeDetectorRef, ComponentFactory, ComponentFactoryResolver, ComponentRef, EmbeddedViewRef, Injector, Type } from '@angular/core';
 import { createRef, Dispatch, JSXElementConstructor, SetStateAction } from 'react';
 import { Component } from 'react';
 import { Observable } from 'rxjs';
@@ -101,6 +101,7 @@ export class NgxReactBridge<directives = {}> extends ToAngularBridge {
             private childrenRender?: number;
             private directiveSubs: [string, OnDirectiveRender<any>][] = [];
             private factory!: InjectorCache;
+            private cd!: ChangeDetectorRef;
 
             componentDidMount() {
                 // find factory
@@ -109,6 +110,7 @@ export class NgxReactBridge<directives = {}> extends ToAngularBridge {
                 // Create a component reference from the component
                 this.componentRef = componentFactory
                     .create(injector, [[this.childNode]]);
+                this.cd = this.componentRef.injector.get(ChangeDetectorRef);
 
                 // Subscribe to events & forward them to react props as functions
                 for (const { propName } of componentFactory.outputs) {
@@ -226,7 +228,7 @@ export class NgxReactBridge<directives = {}> extends ToAngularBridge {
 
 
                 // force change detection
-                this.componentRef.changeDetectorRef.detectChanges();
+                this.cd.detectChanges();
             }
         }
     }
