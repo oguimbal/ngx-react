@@ -102,6 +102,7 @@ export class NgxReactBridge<directives = {}> extends ToAngularBridge {
             private directiveSubs: [string, OnDirectiveRender<any>][] = [];
             private factory!: InjectorCache;
             private cd!: ChangeDetectorRef;
+            private injector!: Injector;
 
             componentDidMount() {
                 // find factory
@@ -110,6 +111,7 @@ export class NgxReactBridge<directives = {}> extends ToAngularBridge {
                 // Create a component reference from the component
                 this.componentRef = componentFactory
                     .create(injector, [[this.childNode]]);
+                this.injector = injector;
                 this.cd = this.componentRef.injector.get(ChangeDetectorRef);
 
                 // Subscribe to events & forward them to react props as functions
@@ -168,7 +170,7 @@ export class NgxReactBridge<directives = {}> extends ToAngularBridge {
 
                 clearTimeout(this.childrenRender);
                 if (this.props.children) {
-                    this.childrenRender = setTimeout(() => render(<>{this.props.children}</>, this.childNode));
+                    this.childrenRender = setTimeout(() => render(<InjectorContext.Provider value={this.injector}>{this.props.children}</InjectorContext.Provider>, this.childNode));
                 } else if (this.childNode.firstChild) {
                     this.childrenRender = setTimeout(() => this.childNode.innerHTML = '');
                 }
