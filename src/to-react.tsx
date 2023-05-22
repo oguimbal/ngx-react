@@ -247,7 +247,7 @@ type AngularToReact<T, O, directives>
     >;
 
 
-type Elt = string | JSX.Element;
+type Elt = string | number | null | undefined | JSX.Element;
 type DeconstructOpts<O>
     = (O extends { children: true } ? { children?: Elt | Elt[] } : {});
 
