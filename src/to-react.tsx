@@ -1,5 +1,5 @@
 import { ApplicationRef, ChangeDetectorRef, ComponentFactory, ComponentFactoryResolver, ComponentRef, EmbeddedViewRef, Injector, Type } from '@angular/core';
-import { createRef, Dispatch, JSXElementConstructor, SetStateAction } from 'react';
+import { createRef, Dispatch, JSXElementConstructor, ReactElement, SetStateAction } from 'react';
 import { Component } from 'react';
 import { Observable } from 'rxjs';
 import { render } from 'react-dom';
@@ -247,9 +247,9 @@ type AngularToReact<T, O, directives>
     >;
 
 
-type Elt = string | number | null | undefined | JSX.Element;
+type Elts = string | number | null | undefined | JSX.Element | ReactElement | Elts[];
 type DeconstructOpts<O>
-    = (O extends { children: true } ? { children?: Elt | Elt[] } : {});
+    = (O extends { children: true } ? { children?: Elts } : {});
 
 /**
  * Detects two-way bindindable props

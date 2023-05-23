@@ -1,6 +1,6 @@
 import { Directive, EventEmitter, Injector, OnChanges, OnDestroy, OnInit, SimpleChanges, Type, ViewContainerRef } from '@angular/core';
 import { render, unmountComponentAtNode } from 'react-dom';
-import {  JSXElementConstructor } from 'react';
+import { JSXElementConstructor } from 'react';
 import { Observable } from 'rxjs';
 import { InjectorContext } from './services';
 
@@ -39,7 +39,9 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
         class DirBase implements OnInit, OnChanges, OnDestroy {
             private props: any = {};
             constructor(private vr: ViewContainerRef, private injector: Injector) {
-                this.refresh();
+                // this.refresh(); triggers creation twice once ngOnInit() re-refreshes (and thus potential duplicated actions & unmounted component warnings)
+                // for instance, this component:  function MyComponent() { const [v, sv] = useState(false);  useEffect(() => {setTimeout(() => sv(true), 50)}); return <div></div> }
+                // will trigger such warning once setTimeout() calls its callback.
             }
 
             ngOnInit() {

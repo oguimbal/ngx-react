@@ -1,6 +1,6 @@
 {
   "name": "ngx-react",
-  "version": "1.1.4",
+  "version": "1.1.6",
   "description": "Migrating from 🅰️ to ⚛️ ? 👉 Use React components in Angular, and vice versa",
   "repository": "https://github.com/oguimbal/ngx-react",
   "issues": "https://github.com/oguimbal/ngx-react/issues",
