@@ -1,12 +1,12 @@
-import { Directive, EventEmitter, Injector, OnChanges, OnDestroy, OnInit, SimpleChanges, Type, ViewContainerRef } from '@angular/core';
+import { Directive, EmbeddedViewRef, EventEmitter, Injector, OnChanges, OnDestroy, OnInit, SimpleChanges, TemplateRef, Type, ViewChild, ViewContainerRef } from '@angular/core';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { JSXElementConstructor } from 'react';
+import { createElement, JSXElementConstructor, useEffect, useRef } from 'react';
 import { Observable } from 'rxjs';
 import { InjectorContext } from './services';
 
 
 export type ReactWrapper = React.JSXElementConstructor<{ children: any; injector: Injector }>;
-
+export const HAS_CHILDREN_TEMPLATE = `<ng-template #content><span><ng-content></ng-content></span></ng-template>`;
 export class ToAngularBridge {
 
     private providers: ReactWrapper[] = [];
@@ -31,6 +31,17 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
     dataChange = new EventEmitter();
 }
 ```
+
+    if your react component has a `children` prop, you can use it like this:
+```typescript
+    @Component({
+        selector: 'my-react-component',
+        template: HAS_CHILDREN_TEMPLATE
+    })
+    export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactComponent) {
+        ...
+    }
+```
      *
      */
     toAngular<T>(Ctor: JSXElementConstructor<T>, Wrapper?: ReactWrapper): ToAngular<T> {
@@ -38,7 +49,14 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
         @Directive({ selector: '__ignore__' })
         class DirBase implements OnInit, OnChanges, OnDestroy {
             private props: any = {};
-            constructor(private vr: ViewContainerRef, private injector: Injector) {
+
+
+            @ViewChild('content', { read: TemplateRef, static: true })
+            _contentRef: TemplateRef<any> | null = null;
+            _contentView?: EmbeddedViewRef<unknown>;
+
+            constructor(private vr: ViewContainerRef
+                , private injector: Injector) {
                 // this.refresh(); triggers creation twice once ngOnInit() re-refreshes (and thus potential duplicated actions & unmounted component warnings)
                 // for instance, this component:  function MyComponent() { const [v, sv] = useState(false);  useEffect(() => {setTimeout(() => sv(true), 50)}); return <div></div> }
                 // will trigger such warning once setTimeout() calls its callback.
@@ -65,6 +83,13 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
             }
 
             private refresh() {
+                if (this._contentRef) {
+                    this._contentView ??= this.vr.createEmbeddedView(this._contentRef);
+                    this._contentView.detectChanges();
+                    this.props.children ??= createElement(NgContent, {
+                        children: this._contentView.rootNodes,
+                    });
+                }
                 let Elt = () => <Ctor {...this.props} />;
 
                 // apply global wrappers
@@ -109,7 +134,18 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
     }
 }
 
-
+function NgContent({ children }: { children: HTMLElement[] }) {
+    const ref = useRef<HTMLElement>(null);
+    useEffect(() => {
+        if (!ref.current) {
+            return;
+        }
+        for (const c of children) {
+            ref.current.appendChild(c);
+        }
+    }, [children]);
+    return <span ref={ref}></span>;
+}
 
 type ToAngular<T> = Type<MapNg<T>>;
 type MapNg<T> = { [k in keyof T]: PropType<T[k]> }
