@@ -1,6 +1,6 @@
 import { Directive, EmbeddedViewRef, EventEmitter, Injector, OnChanges, OnDestroy, OnInit, SimpleChanges, TemplateRef, Type, ViewChild, ViewContainerRef } from '@angular/core';
 import { createRoot, Root } from 'react-dom/client';
-import { createElement, JSXElementConstructor, useEffect, useRef } from 'react';
+import { createElement, JSXElementConstructor, useEffect, useRef, useState } from 'react';
 import { Observable } from 'rxjs';
 import { InjectorContext } from './services';
 
@@ -50,6 +50,7 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
         class DirBase implements OnInit, OnChanges, OnDestroy {
             private props: any = {};
             private root: Root | null = null;
+            private setProps?: (props: any) => void;
 
             @ViewChild('content', { read: TemplateRef, static: true })
             _contentRef: TemplateRef<any> | null = null;
@@ -83,7 +84,6 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
             }
 
             private refresh() {
-                this.root ??= createRoot(this.vr.element.nativeElement);
                 if (this._contentRef) {
                     this._contentView ??= this.vr.createEmbeddedView(this._contentRef);
                     this._contentView.detectChanges();
@@ -91,29 +91,40 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
                         children: this._contentView.rootNodes,
                     });
                 }
-                let Elt = () => <Ctor {...this.props} />;
 
-                // apply global wrappers
-                for (const Wrap of that.providers) {
-                    const OldEl = Elt;
-                    Elt = () => (<Wrap injector={this.injector}>
-                        <OldEl />
-                    </Wrap>);
+                if (!this.root) {
+                    this.root = createRoot(this.vr.element.nativeElement);
+
+                    let Elt = () => {
+                        const [props, setProps] = useState(this.props);
+                        this.setProps = setProps;
+                        return <Ctor {...props} />
+                    };
+
+                    // apply global wrappers
+                    for (const Wrap of that.providers) {
+                        const OldEl = Elt;
+                        Elt = () => (<Wrap injector={this.injector}>
+                            <OldEl />
+                        </Wrap>);
+                    }
+
+                    // apply local wrapper
+                    if (Wrapper) {
+                        Elt = () => (
+                            <Wrapper injector={this.injector}>
+                                <Elt />
+                            </Wrapper>
+                        );
+                    }
+
+                    // provide injector & render
+                    this.root.render(<InjectorContext.Provider value={this.injector}>
+                        <Elt />
+                    </InjectorContext.Provider>,);
+                } else {
+                    this.setProps?.({ ...this.props });
                 }
-
-                // apply local wrapper
-                if (Wrapper) {
-                    Elt = () => (
-                        <Wrapper injector={this.injector}>
-                            <Elt />
-                        </Wrapper>
-                    );
-                }
-
-                // provide injector & render
-                this.root.render(<InjectorContext.Provider value={this.injector}>
-                    <Elt />
-                </InjectorContext.Provider>, );
             }
 
             ngOnDestroy() {
