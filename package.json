@@ -1,6 +1,6 @@
 {
   "name": "ngx-react",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Migrating from 🅰️ to ⚛️ ? 👉 Use React components in Angular, and vice versa",
   "repository": "https://github.com/oguimbal/ngx-react",
   "issues": "https://github.com/oguimbal/ngx-react/issues",
@@ -9,17 +9,17 @@
   "license": "MIT",
   "devDependencies": {
     "@angular/core": "^12.2.7",
-    "@types/react": "^17.0.24",
-    "@types/react-dom": "^17.0.9",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "react": "^18",
+    "react-dom": "^18",
     "rxjs": "^6.5.4",
     "typescript": "^4.4.3"
   },
   "peerDependencies": {
     "@angular/core": "^12.2.7",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18",
+    "react-dom": "^18",
     "rxjs": "^6.5.4"
   }
 }

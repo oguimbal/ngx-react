@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { render } from 'react-dom';
 import { ToAngularBridge } from './to-angular';
 import { InjectorContext } from './services';
+import { createRoot, Root } from 'react-dom/client';
 
 interface ToReactOpts {
     /** Has transcluded children ? */
@@ -103,10 +104,11 @@ export class NgxReactBridge<directives = {}> extends ToAngularBridge {
             private factory!: InjectorCache;
             private cd!: ChangeDetectorRef;
             private injector!: Injector;
+            private childrenRoot: Root | null = null;
 
             componentDidMount() {
                 // find factory
-                const { injector, inOutsByEvent, componentFactory, appRef } = this.factory = cacheFactory(this.context);
+                const { injector, inOutsByEvent, componentFactory, appRef } = this.factory = cacheFactory(this.context as Injector);
 
                 // Create a component reference from the component
                 this.componentRef = componentFactory
@@ -162,17 +164,24 @@ export class NgxReactBridge<directives = {}> extends ToAngularBridge {
                     this.factory!.appRef.detachView(this.componentRef.hostView);
                     this.componentRef.destroy();
                     this.componentRef = undefined;
+                    clearTimeout(this.childrenRender);
+                    this.childrenRoot?.unmount();
+                    this.childrenRoot = null;
+                    this.childNode.innerHTML = '';
                 }
             }
 
             render() {
                 this.updateProps();
-
                 clearTimeout(this.childrenRender);
                 if (this.props.children) {
-                    this.childrenRender = setTimeout(() => render(<InjectorContext.Provider value={this.injector}>{this.props.children}</InjectorContext.Provider>, this.childNode));
-                } else if (this.childNode.firstChild) {
-                    this.childrenRender = setTimeout(() => this.childNode.innerHTML = '');
+                    this.childrenRoot ??= createRoot(this.childNode);
+                    this.childrenRender = setTimeout(() => this.childrenRoot?.render(<InjectorContext.Provider value={this.injector}>{this.props.children}</InjectorContext.Provider>));
+                } else if (this.childNode.firstChild || this.childrenRoot) {
+                    this.childrenRender = setTimeout(() => {
+                        this.childrenRoot?.unmount();
+                        this.childNode.innerHTML = '';
+                    });
                 }
 
                 return <span className={this.props.className} ref={this.domRef} />;

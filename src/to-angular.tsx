@@ -1,5 +1,5 @@
 import { Directive, EmbeddedViewRef, EventEmitter, Injector, OnChanges, OnDestroy, OnInit, SimpleChanges, TemplateRef, Type, ViewChild, ViewContainerRef } from '@angular/core';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { createElement, JSXElementConstructor, useEffect, useRef } from 'react';
 import { Observable } from 'rxjs';
 import { InjectorContext } from './services';
@@ -49,7 +49,7 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
         @Directive({ selector: '__ignore__' })
         class DirBase implements OnInit, OnChanges, OnDestroy {
             private props: any = {};
-
+            private root: Root | null = null;
 
             @ViewChild('content', { read: TemplateRef, static: true })
             _contentRef: TemplateRef<any> | null = null;
@@ -83,6 +83,7 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
             }
 
             private refresh() {
+                this.root ??= createRoot(this.vr.element.nativeElement);
                 if (this._contentRef) {
                     this._contentView ??= this.vr.createEmbeddedView(this._contentRef);
                     this._contentView.detectChanges();
@@ -110,13 +111,13 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
                 }
 
                 // provide injector & render
-                render(<InjectorContext.Provider value={this.injector}>
+                this.root.render(<InjectorContext.Provider value={this.injector}>
                     <Elt />
-                </InjectorContext.Provider>, this.vr.element.nativeElement);
+                </InjectorContext.Provider>, );
             }
 
             ngOnDestroy() {
-                unmountComponentAtNode(this.vr.element.nativeElement)
+                this.root?.unmount();
             }
         }
 
