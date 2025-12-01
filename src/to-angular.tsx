@@ -162,5 +162,5 @@ function NgContent({ children }: { children: HTMLElement[] }) {
 }
 
 type ToAngular<T> = Type<MapNg<T>>;
-type MapNg<T> = { [k in keyof T]: PropType<T[k]> }
+type MapNg<T> = { [k in keyof T]: PropType<T[k]> } & { ngOnInit(): void; ngOnChanges(changes: SimpleChanges): void };
 type PropType<T> = T extends (arg: infer X) => any ? Observable<X> : T;
