@@ -128,7 +128,9 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
             }
 
             ngOnDestroy() {
-                this.root?.unmount();
+                setTimeout(() => {
+                    this.root?.unmount();
+                });
             }
         }
 

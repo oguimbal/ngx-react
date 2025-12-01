@@ -165,9 +165,11 @@ export class NgxReactBridge<directives = {}> extends ToAngularBridge {
                     this.componentRef.destroy();
                     this.componentRef = undefined;
                     clearTimeout(this.childrenRender);
-                    this.childrenRoot?.unmount();
-                    this.childrenRoot = null;
-                    this.childNode.innerHTML = '';
+                    setTimeout(() => {
+                        this.childrenRoot?.unmount();
+                        this.childrenRoot = null;
+                        this.childNode.innerHTML = '';
+                    });
                 }
             }
 
@@ -180,6 +182,7 @@ export class NgxReactBridge<directives = {}> extends ToAngularBridge {
                 } else if (this.childNode.firstChild || this.childrenRoot) {
                     this.childrenRender = setTimeout(() => {
                         this.childrenRoot?.unmount();
+                        this.childrenRoot = null;
                         this.childNode.innerHTML = '';
                     });
                 }
