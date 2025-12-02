@@ -158,8 +158,11 @@ export class ThingNg extends reactBridge.toAngular(Thing) {
 }
 
 // and use it like that in your angular template:
+//  ⚠️ You will have to wrap content in an <ng-template>, though
 <thing>
-  <span> whatever </span>
+  <ng-template>
+    <span> whatever </span>
+  </ng-template>
 </thing>
 ```
 
