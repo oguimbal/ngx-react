@@ -144,6 +144,27 @@ Then, declare `MyReactComponent_Angular` in your ng-module, and you'll be able t
 ```
 
 
+You can also use content projection of Angular in your React component, by using the `children` prop:
+
+```tsx
+function Thing(props: {
+  children: React.ReactNode;
+}) {
+    // [...]
+}
+
+@Directive({ selector: "thing" })
+export class ThingNg extends reactBridge.toAngular(Thing) {
+}
+
+// and use it like that in your angular template:
+<thing>
+  <span> whatever </span>
+</thing>
+```
+
+
+
 # Access 🅰️ Angular services from ⚛️ React
 
 Easy
@@ -200,4 +221,3 @@ return <MyComonent value$={value} />;
 Currently not supported (todo):
 
 - Integration with the Angular router
-- Inject children in React that are declared in Angular.

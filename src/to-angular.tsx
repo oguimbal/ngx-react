@@ -1,4 +1,4 @@
-import { Directive, EmbeddedViewRef, EventEmitter, Injector, OnChanges, OnDestroy, OnInit, SimpleChanges, TemplateRef, Type, ViewChild, ViewContainerRef } from '@angular/core';
+import { ContentChild, Directive, EmbeddedViewRef, EventEmitter, Injector, OnChanges, OnDestroy, OnInit, SimpleChanges, TemplateRef, Type, ViewChild, ViewContainerRef } from '@angular/core';
 import { createRoot, Root } from 'react-dom/client';
 import { createElement, JSXElementConstructor, useEffect, useRef, useState } from 'react';
 import { Observable } from 'rxjs';
@@ -52,8 +52,8 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
             private root: Root | null = null;
             private setProps?: (props: any) => void;
 
-            @ViewChild('content', { read: TemplateRef, static: true })
-            _contentRef: TemplateRef<any> | null = null;
+            @ContentChild(TemplateRef)
+            _contentRef?: TemplateRef<any>;
             _contentView?: EmbeddedViewRef<unknown>;
 
             constructor(private vr: ViewContainerRef
@@ -70,6 +70,10 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
                     }
                     this.props[k] = (e: any) => v.emit(e);
                 }
+                this.refresh();
+            }
+
+            ngAfterViewInit() {
                 this.refresh();
             }
 
