@@ -53,7 +53,9 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
             private setProps?: (props: any) => void;
 
             @ContentChild(TemplateRef)
-            _contentRef?: TemplateRef<any>;
+            _tplRef?: TemplateRef<any>;
+            @ViewChild('content')
+            _tcontentRef?: TemplateRef<any>;
             _contentView?: EmbeddedViewRef<unknown>;
 
             constructor(private vr: ViewContainerRef
@@ -88,11 +90,12 @@ export class MyReactComponent_Angular extends reactBridge.toAngular(MyReactCompo
             }
 
             private refresh() {
-                if (this._contentRef) {
-                    this._contentView ??= this.vr.createEmbeddedView(this._contentRef);
+                const content = this._tcontentRef ?? this._tplRef;
+                if (content) {
+                    this._contentView ??= this.vr.createEmbeddedView(content);
                     this._contentView.detectChanges();
                     this.props.children ??= createElement(NgContent, {
-                        children: this._contentView.rootNodes,
+                        children: this._contentView.rootNodes
                     });
                 }
 
